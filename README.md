@@ -114,18 +114,56 @@ cd cc-memory-arch && git pull && ./install.sh
 | "Electron native rebuild 命令是 X" | `~/.claude/topics/electron.md` |
 | "调用 report agent 时不要覆盖路径" | `~/.claude/memory/feedback_*.md` + 更新 MEMORY.md（多条规则、跨项目通用）|
 
-## 与其他 memory 项目的关系
+## 多维度对比评分
 
-| | claude-mem | MemPalace | memsearch | cc-memory-arch |
-|---|---|---|---|---|
-| 自动捕获 | ✅ | ✅ | ✅ | ❌（手动 / agent） |
-| 语义检索 | ✅ 向量 | ✅ 向量 | ✅ Milvus | ❌ |
-| 基础设施 | SQLite+Chroma | Chroma+SQLite | Milvus | **零** |
-| 主动 curation | ❌ | ❌ | ❌ | ✅ |
-| 跨项目共享路由 | — | — | — | ✅（USER.md / 全局 / topics）|
-| 分类强制点 | — | — | — | hook + skill（不靠 prompt 信仰）|
+每维度 0–10 分。**没有单一"最好"——按你最在意的维度选**。
+不打总分（不同维度对不同人权重不同，加和无意义）。
 
-不与上述项目竞争"装得多"，专注"装得对"+ "防膨胀"。
+| 维度 | claude-mem | MemPalace | memsearch | mem-compiler | supermemory | **cc 原生** | **cc-memory-arch** |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| 自动捕获工具调用/对话 | **10** | 9 | 9 | 9 | 8 | 7 | 4 |
+| 检索深度（向量/全文/索引） | 9 | **10** | **10** | 4 | 9 | 0 | 2 |
+| 基础设施轻量（无 daemon/DB） | 3 | 4 | 3 | 7 | 8☁ | **10** | **10** |
+| 主动 curation / 防膨胀 | 3 | 2 | 4 | 6 | 3 | 1 | **9** |
+| 跨项目偏好真正全局生效 | 5 | 7 | 9 | 5 | 8 | 0 | **9** |
+| 分类强制点（hook 而非 prompt） | 0 | 0 | 0 | 0 | 0 | 0 | **10** |
+| 本地隐私 / 数据不出本机 | 8 | **10** | 9 | 9 | 2☁ | **10** | **10** |
+| 撤销 / 修改可逆性 | 7 | 7 | 7 | 7 | 6 | **10** | 9 |
+
+`☁` = 必须云端订阅。
+
+### 评分依据（关键差异说明）
+
+- **自动捕获**：claude-mem / MemPalace / memsearch 通过 hooks 自动记录对话与工具调用；cc-memory-arch **故意不做**——只在用户/agent 显式触发 mem-write 时写入，避免噪声。
+- **检索深度**：cc-memory-arch 仅有 markdown 索引（MEMORY.md），无向量数据库。需要"语义召回项目里讲过什么"的场景**不该**选本项目。
+- **主动 curation**：唯一一个把容量上限、撤销规则、recall 优先合并、去重、索引同步**做成强制流程**的项目。其他项目专注"装得多"，本项目专注"装得对"。
+- **分类强制点**：用 PreToolUse hook 在 tool 调用层拦截未走 mem-write skill 的写入，模型无法用 prompt 绕过。其他项目都依赖"模型自觉"。
+- **跨项目共享**：cc 官方 auto-memory 是 per-cwd 的（`~/.claude/projects/<hash>/memory/`），换 cwd 启动 cc 就读不到——这是它最大的缺陷。本项目把用户级偏好提到 `~/.claude/memory/USER.md` + 全局 entry + topics 三个真正全局的层。
+
+### 按场景选
+
+| 你最在意 | 推荐 |
+|---|---|
+| 装上就自动学 + 强语义检索 | **claude-mem** 或 **MemPalace** |
+| 跨多个 agent（cc/codex/opencode）共享一份记忆 | **memsearch** |
+| 把对话编译成结构化知识库（Karpathy 风） | **claude-memory-compiler** |
+| 团队级共享 + 不在乎云端 | **claude-supermemory** |
+| 完全不想装东西，cc 默认就够用 | **cc 原生 auto-memory**（接受 per-cwd 限制） |
+| 已用 cc 数月，CLAUDE.md/MEMORY.md 长成杂物间，想要主动整理纪律 + 跨项目偏好真全局 + 撤销时干净归零 | **cc-memory-arch** |
+
+### 跟 cc 原生 auto-memory 的关系
+
+cc-memory-arch **不替代** cc 原生 auto-memory，而是**修补 + 加纪律**：
+
+| | cc 原生 | cc-memory-arch 增强 |
+|---|---|---|
+| 用户级偏好作用域 | per-cwd（换目录失效）| 上提到 USER.md / 全局 entry，真正全局 |
+| 容量管理 | 仅 MEMORY.md 200 行硬截 | 分级容量上限 + 70% 触发 audit |
+| 撤销语义 | 模型自由发挥（常写"不再 X"残留）| 单一不变量强制干净归零 |
+| 路由判断 | 全部进 per-cwd | 4 层决策树 + recall 优先 |
+| 强制层 | 无 | PreToolUse hook 拦截 |
+
+装上后 cc 原生 auto-memory 仍然工作——只是写入路径被 mem-write skill 接管和路由。
 
 ## 调试
 
