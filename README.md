@@ -114,42 +114,73 @@ cd cc-memory-arch && git pull && ./install.sh
 | "Electron native rebuild 命令是 X" | `~/.claude/topics/electron.md` |
 | "调用 report agent 时不要覆盖路径" | `~/.claude/memory/feedback_*.md` + 更新 MEMORY.md（多条规则、跨项目通用）|
 
-## 多维度对比评分
+## 多维度对比评分（18 维）
 
-每维度 0–10 分。**没有单一"最好"——按你最在意的维度选**。
-不打总分（不同维度对不同人权重不同，加和无意义）。
+每维度 0–10 分。**不打总分**——不同维度对不同用户权重不同，加和误导。
+评分基于各项目公开文档、源码、benchmark，**非 head-to-head 实测**，可能存在偏差，欢迎 issue 修正。
 
-| 维度 | claude-mem | MemPalace | memsearch | mem-compiler | supermemory | **cc 原生** | **cc-memory-arch** |
+`☁` 标记 = 必须云端订阅或 API。
+
+### A. 功能能力
+
+| 维度 | claude-mem | MemPalace | memsearch | mem-compiler | supermemory | cc 原生 | **cc-memory-arch** |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| 自动捕获工具调用/对话 | **10** | 9 | 9 | 9 | 8 | 7 | 4 |
-| 检索深度（向量/全文/索引） | 9 | **10** | **10** | 4 | 9 | 0 | 2 |
-| 基础设施轻量（无 daemon/DB） | 3 | 4 | 3 | 7 | 8☁ | **10** | **10** |
-| 主动 curation / 防膨胀 | 3 | 2 | 4 | 6 | 3 | 1 | **9** |
-| 跨项目偏好真正全局生效 | 5 | 7 | 9 | 5 | 8 | 0 | **9** |
-| 分类强制点（hook 而非 prompt） | 0 | 0 | 0 | 0 | 0 | 0 | **10** |
-| 本地隐私 / 数据不出本机 | 8 | **10** | 9 | 9 | 2☁ | **10** | **10** |
-| 撤销 / 修改可逆性 | 7 | 7 | 7 | 7 | 6 | **10** | 9 |
+| 1. 自动捕获工具调用/对话 | **10** | 9 | 9 | 9 | 8 | 7 | 4 |
+| 2. 检索深度（向量/全文/索引混合） | 9 | **10** | **10** | 4 | 9 | 0 | 2 |
+| 3. 检索精度（公开 benchmark 数据） | 5 | **10** | 5 | 0 | 5 | 0 | 0 |
+| 4. 跨会话连续性 | **10** | **10** | **10** | 9 | 9 | 6 | 8 |
+| 5. 多实体 / 分层管理（人/项目/topic） | 5 | **10** | 6 | 6 | 8 | 3 | 7 |
 
-`☁` = 必须云端订阅。
+### B. 部署 / 资源
 
-### 评分依据（关键差异说明）
+| 维度 | claude-mem | MemPalace | memsearch | mem-compiler | supermemory | cc 原生 | **cc-memory-arch** |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| 6. 基础设施轻量（无 daemon / DB） | 3 | 4 | 3 | 7 | 8☁ | **10** | **10** |
+| 7. 磁盘 / 内存占用低 | 4 | 4 | 3 | 7 | **9**☁ | **10** | **10** |
+| 8. 数据格式开放（markdown / 可 grep） | 6 | 7 | 8 | **10** | 3 | **10** | **10** |
+| 9. 跨 agent 兼容（cc/codex/opencode 等） | 6 | 7 | **10** | 4 | 5 | 3 | 3 |
+| 10. cc plugin 标准化（marketplace） | **10** | 7 | 9 | 7 | **10** | N/A | **10** |
+| 11. 安装复杂度低 | 5 | 5 | 4 | 6 | 8 | **10** | 8 |
 
-- **自动捕获**：claude-mem / MemPalace / memsearch 通过 hooks 自动记录对话与工具调用；cc-memory-arch **故意不做**——只在用户/agent 显式触发 mem-write 时写入，避免噪声。
-- **检索深度**：cc-memory-arch 仅有 markdown 索引（MEMORY.md），无向量数据库。需要"语义召回项目里讲过什么"的场景**不该**选本项目。
-- **主动 curation**：唯一一个把容量上限、撤销规则、recall 优先合并、去重、索引同步**做成强制流程**的项目。其他项目专注"装得多"，本项目专注"装得对"。
-- **分类强制点**：用 PreToolUse hook 在 tool 调用层拦截未走 mem-write skill 的写入，模型无法用 prompt 绕过。其他项目都依赖"模型自觉"。
-- **跨项目共享**：cc 官方 auto-memory 是 per-cwd 的（`~/.claude/projects/<hash>/memory/`），换 cwd 启动 cc 就读不到——这是它最大的缺陷。本项目把用户级偏好提到 `~/.claude/memory/USER.md` + 全局 entry + topics 三个真正全局的层。
+### C. 治理 / 质量
 
-### 按场景选
+| 维度 | claude-mem | MemPalace | memsearch | mem-compiler | supermemory | cc 原生 | **cc-memory-arch** |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| 12. 主动 curation / 防膨胀 | 3 | 2 | 4 | 6 | 3 | 1 | **9** |
+| 13. 去重 / 冲突合并 | 4 | 5 | 5 | 6 | 4 | 2 | **9** |
+| 14. 撤销 / 修改语义控制 | 4 | 4 | 4 | 4 | 4 | 3 | **9** |
+| 15. 写入路径强制（hook 拦截 vs prompt 信仰） | 0 | 0 | 0 | 0 | 0 | 0 | **10** |
+| 16. 可观测性（日志 / 审计） | **9** | 7 | 6 | 5 | 6 | 4 | 6 |
 
-| 你最在意 | 推荐 |
-|---|---|
-| 装上就自动学 + 强语义检索 | **claude-mem** 或 **MemPalace** |
-| 跨多个 agent（cc/codex/opencode）共享一份记忆 | **memsearch** |
-| 把对话编译成结构化知识库（Karpathy 风） | **claude-memory-compiler** |
-| 团队级共享 + 不在乎云端 | **claude-supermemory** |
-| 完全不想装东西，cc 默认就够用 | **cc 原生 auto-memory**（接受 per-cwd 限制） |
-| 已用 cc 数月，CLAUDE.md/MEMORY.md 长成杂物间，想要主动整理纪律 + 跨项目偏好真全局 + 撤销时干净归零 | **cc-memory-arch** |
+### D. 隐私 / 成熟度
+
+| 维度 | claude-mem | MemPalace | memsearch | mem-compiler | supermemory | cc 原生 | **cc-memory-arch** |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| 17. 本地隐私（数据不出本机） | 9 | **10** | 9 | 9 | 2☁ | **10** | **10** |
+| 18. 社区成熟度（star / 活跃度） | **10** | **10** | 6 | 5 | 6 | **10** | 1 |
+
+---
+
+### 我擅长什么、不擅长什么
+
+**cc-memory-arch 在 18 维中**：
+- **拿到 9–10 的 8 维**：基础设施、磁盘占用、格式开放、plugin 标准化、curation、去重、撤销、强制点、隐私
+- **拿到 6–8 的 4 维**：跨会话、多实体、安装、可观测
+- **明确弱项（≤4）的 6 维**：自动捕获（4）、检索深度（2）、检索 benchmark（0）、跨 agent 兼容（3）、社区（1）
+
+**这些弱项是事实**——本项目**故意舍弃**了"自动捕获 + 强检索"赛道，因为 claude-mem / MemPalace 已经做到极致，重复造轮子无意义。社区成熟度（1）只是因为 v1.0.x 刚发布，无法短期改变。
+
+### 按你最在意的维度选
+
+| 场景 | 推荐 | 关键得分 |
+|---|---|---|
+| 装上就自动学 + 强语义检索 | **claude-mem** / **MemPalace** | 维度 1–4 |
+| 跨多个 agent（cc/codex/opencode）一份记忆 | **memsearch** | 维度 9 |
+| 经过验证的检索精度（benchmark）| **MemPalace** | 维度 3 (10/10) |
+| 团队共享 + 不在乎云端 | **supermemory** | — |
+| 把对话编译成知识库（Karpathy 风） | **mem-compiler** | 维度 12 (6) |
+| 完全零部署，能用就行 | **cc 原生** | 维度 6/7/11 |
+| 多月 cc 用户、CLAUDE.md 已成杂物间、想要主动整理 + 跨项目偏好真全局 + 撤销干净 | **cc-memory-arch** | 维度 12–15 |
 
 ### 跟 cc 原生 auto-memory 的关系
 
