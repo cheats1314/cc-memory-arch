@@ -10,7 +10,7 @@
       "name": "cc-memory-arch",
       "source": "./",
       "description": "Memory routing & curation discipline for Claude Code: 4-layer routing (USER.md / global entry / topics / per-cwd) enforced via PreToolUse hook + mem-write skill",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "license": "MIT",
       "homepage": "https://github.com/cheats1314/cc-memory-arch",
       "repository": "https://github.com/cheats1314/cc-memory-arch",
