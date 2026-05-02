@@ -1,12 +1,14 @@
 {
   "name": "cc-memory-arch",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "MIT",
   "description": "Memory routing & curation discipline for Claude Code",
-  "author": "cheats1314",
-  "skills": [
-    { "path": "skills/mem-write" }
-  ],
+  "author": {
+    "name": "cheats1314",
+    "email": "dengjiang0331@gmail.com"
+  },
+  "homepage": "https://github.com/cheats1314/cc-memory-arch",
+  "repository": "https://github.com/cheats1314/cc-memory-arch",
   "hooks": {
     "PreToolUse": [
       {
