@@ -1,0 +1,27 @@
+{
+  "name": "cc-memory-arch",
+  "version": "1.0.0",
+  "description": "Memory routing & curation discipline for Claude Code",
+  "author": "cheats1314",
+  "skills": [
+    { "path": "skills/mem-write" }
+  ],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_DIR}/hooks/pre-mem-write.sh" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_DIR}/hooks/post-mem-write.sh" }
+        ]
+      }
+    ]
+  }
+}
