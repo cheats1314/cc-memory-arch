@@ -12,6 +12,10 @@ LOG=/tmp/mem-write-hook.log
 
 FP=$(jq -r '.tool_input.file_path // ""' <<<"$EVENT")
 CWD=$(jq -r '.cwd // ""' <<<"$EVENT")
+
+# ~ 展开
+[[ -n "$FP" && "$FP" == ~* ]] && FP="${FP/#\~/$HOME}"
+
 if [[ -n "$FP" && "$FP" != /* ]]; then
   [[ -n "$CWD" ]] && FP="$CWD/$FP" || FP="$PWD/$FP"
 fi

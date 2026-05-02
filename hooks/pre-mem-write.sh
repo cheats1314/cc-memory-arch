@@ -14,6 +14,9 @@ FP=$(jq -r '.tool_input.file_path // ""' <<<"$EVENT")
 CWD=$(jq -r '.cwd // ""' <<<"$EVENT")
 TRANSCRIPT=$(jq -r '.transcript_path // ""' <<<"$EVENT")
 
+# ~ 展开
+[[ -n "$FP" && "$FP" == ~* ]] && FP="${FP/#\~/$HOME}"
+
 # 相对路径 → 绝对路径
 if [[ -n "$FP" && "$FP" != /* ]]; then
   if [[ -n "$CWD" ]]; then
