@@ -1,6 +1,7 @@
 {
   "name": "cc-memory-arch",
-  "version": "1.0.0",
+  "version": "1.0.1",
+  "license": "MIT",
   "description": "Memory routing & curation discipline for Claude Code",
   "author": "cheats1314",
   "skills": [
@@ -11,7 +12,7 @@
       {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
-          { "type": "command", "command": "${CLAUDE_PLUGIN_DIR}/hooks/pre-mem-write.sh" }
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pre-mem-write.sh" }
         ]
       }
     ],
@@ -19,7 +20,7 @@
       {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
-          { "type": "command", "command": "${CLAUDE_PLUGIN_DIR}/hooks/post-mem-write.sh" }
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/post-mem-write.sh" }
         ]
       }
     ]

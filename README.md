@@ -45,7 +45,28 @@ cc-memory-arch/
 
 ## 安装
 
-需要 `bash` / `jq` / `claude code ≥ 2.1`。
+需要 cc ≥ 2.1。
+
+### 推荐：通过 cc 内建 plugin marketplace
+
+在 cc 会话里：
+
+```
+/plugin marketplace add cheats1314/cc-memory-arch
+/plugin install cc-memory-arch@cc-memory-arch
+```
+
+cc 会自动 clone 仓库到本地 plugin 缓存、注册 skill、注册 hooks。**无需手动 ./install.sh，无需改 CLAUDE.md / settings.json**。
+
+升级：
+
+```
+/plugin marketplace update cc-memory-arch
+```
+
+### 备选：脚本手动安装
+
+需要 `bash` / `jq`。适合不想走 cc plugin 机制的人，或想审一遍脚本动作。
 
 ```bash
 git clone https://github.com/cheats1314/cc-memory-arch.git
@@ -65,7 +86,7 @@ cd cc-memory-arch && ./install.sh
 
 所有改动**幂等**——重复跑 `install.sh` 不会重复注入或覆盖你已有的 USER.md。
 
-## 升级
+升级：
 
 ```bash
 cd cc-memory-arch && git pull && ./install.sh

@@ -1,0 +1,21 @@
+{
+  "name": "cc-memory-arch",
+  "owner": {
+    "name": "cheats1314",
+    "email": "dengjiang0331@gmail.com"
+  },
+  "description": "Memory routing & curation discipline plugin for Claude Code",
+  "plugins": [
+    {
+      "name": "cc-memory-arch",
+      "source": "./",
+      "description": "Memory routing & curation discipline for Claude Code: 4-layer routing (USER.md / global entry / topics / per-cwd) enforced via PreToolUse hook + mem-write skill",
+      "version": "1.0.1",
+      "license": "MIT",
+      "homepage": "https://github.com/cheats1314/cc-memory-arch",
+      "repository": "https://github.com/cheats1314/cc-memory-arch",
+      "keywords": ["memory", "skill", "hook", "curation", "routing", "discipline"],
+      "category": "productivity"
+    }
+  ]
+}
