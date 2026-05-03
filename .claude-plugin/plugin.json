@@ -1,6 +1,6 @@
 {
   "name": "cc-memory-arch",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "license": "MIT",
   "description": "Memory routing & curation discipline for Claude Code",
   "author": {
@@ -9,6 +9,10 @@
   },
   "homepage": "https://github.com/cheats1314/cc-memory-arch",
   "repository": "https://github.com/cheats1314/cc-memory-arch",
+  "commands": [
+    "./commands/setup.md",
+    "./commands/cleanup.md"
+  ],
   "hooks": {
     "PreToolUse": [
       {

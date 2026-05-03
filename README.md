@@ -31,77 +31,60 @@ cc 原生 auto-memory 把所有"记住 X"都写到 per-cwd 路径，导致：
 
 ```
 cc-memory-arch/
-├── .claude-plugin/plugin.json
+├── .claude-plugin/
+│   ├── plugin.json                 # cc plugin 注册（hooks + commands）
+│   └── marketplace.json            # cc marketplace 元数据
 ├── skills/mem-write/SKILL.md       # 分类决策树（核心）
 ├── hooks/
 │   ├── pre-mem-write.sh            # 强制 skill
 │   ├── post-mem-write.sh           # 容量 / 索引审计
 │   └── lib.sh
-├── templates/claude-md-snippet.md  # @-import 进 ~/.claude/CLAUDE.md
-├── install.sh
-├── uninstall.sh
+├── commands/
+│   ├── setup.md                    # /cc-memory-arch:setup（初始化用户侧资源）
+│   └── cleanup.md                  # /cc-memory-arch:cleanup（卸载后清理残留）
 └── README.md
 ```
 
 ## 安装
 
-需要 cc ≥ 2.1。
+需要 cc ≥ 2.1。**纯 cc plugin 模式**——无 install.sh / 不改 settings.json / 不污染你的 plugin 目录。
 
-### 推荐：通过 cc 内建 plugin marketplace
-
-在 cc 会话里：
+在 cc 会话里依次跑：
 
 ```
 /plugin marketplace add cheats1314/cc-memory-arch
-/plugin install cc-memory-arch@cc-memory-arch
+/plugin install cc-memory-arch@cc-memory-arch --scope user
+/cc-memory-arch:setup
 ```
 
-cc 会自动 clone 仓库到本地 plugin 缓存、注册 skill、注册 hooks。**无需手动 ./install.sh，无需改 CLAUDE.md / settings.json**。
+三步含义：
+
+1. **marketplace add**：cc 把仓库 clone 到 `~/.claude/plugins/marketplaces/cc-memory-arch/`
+2. **plugin install --scope user**：cc 把 plugin 解压到 `~/.claude/plugins/cache/cc-memory-arch/cc-memory-arch/<version>/`，在 `~/.claude/settings.json.enabledPlugins` 注册启用，自动加载 hooks（`${CLAUDE_PLUGIN_ROOT}` 由 cc 替换）和 skill（前缀 `cc-memory-arch:mem-write`）。
+   - **scope 选择**：`--scope user` = 全局可用（推荐 mem-write 这种全局功能）；`--scope local` = 仅当前 cwd（隔离），写到 `settings.local.json`。
+3. **`/cc-memory-arch:setup`**：plugin 协议无法做的"用户侧"一次性初始化——创建 `~/.claude/memory/USER.md` / `MEMORY.md`，注入 `@memory/USER.md` 到 `~/.claude/CLAUDE.md`。**幂等**，已存在的不会被覆盖。
+
+跑完 setup 后**重启 cc 会话**让 `@-import` 生效。
 
 升级：
 
 ```
 /plugin marketplace update cc-memory-arch
+/plugin install cc-memory-arch@cc-memory-arch --scope user
 ```
-
-### 备选：脚本手动安装
-
-需要 `bash` / `jq`。适合不想走 cc plugin 机制的人，或想审一遍脚本动作。
-
-```bash
-git clone https://github.com/cheats1314/cc-memory-arch.git
-cd cc-memory-arch && ./install.sh
-```
-
-完全退出当前 cc 会话（exit / Ctrl+D）后重开，安装即生效。
-
-**clone 目录之后可删**——`install.sh` 是 `cp -r` 真安装，安装产物独立于源目录，不依赖你保留 git clone 位置。
-
-安装会做：
-- 复制 plugin → `~/.claude/plugins/cc-memory-arch/`（独立副本）
-- 复制 skill → `~/.claude/skills/mem-write/`（cc 默认扫描位置）
-- 在 `~/.claude/CLAUDE.md` 末尾追加 `@-import` 指向 plugin snippet
-- 在 `~/.claude/settings.local.json` 注册 PreToolUse / PostToolUse hooks（不污染共享的 `settings.json`）
-- 初始化 `~/.claude/memory/USER.md` 与 `~/.claude/memory/MEMORY.md`（仅在不存在时）
-
-所有改动**幂等**——重复跑 `install.sh` 不会重复注入或覆盖你已有的 USER.md。
-
-升级：
-
-```bash
-cd cc-memory-arch && git pull && ./install.sh
-```
-
-`install.sh` 会重新 `cp -r`，更新 plugin/skill 内容；CLAUDE.md / settings.local.json 因幂等不会重复修改。
 
 ## 卸载
 
-```bash
-~/.claude/plugins/cc-memory-arch/uninstall.sh
+```
+/plugin uninstall cc-memory-arch@cc-memory-arch --scope user
+/cc-memory-arch:cleanup
 ```
 
-清除：plugin 副本、skill 副本、CLAUDE.md 中的 `@-import` 行、settings.local.json 中的 cc-memory-arch hooks。
-**保留**：`~/.claude/memory/` 与 `~/.claude/topics/` 下所有数据。CLAUDE.md / settings.local.json 都生成 `.bak` 备份。
+`/plugin uninstall` 会：从 `installed_plugins.json` 删条目、给 cache 打 `.orphaned_at`。
+
+`/cc-memory-arch:cleanup` 会清理 cc 自身**不会**清的残留：CLAUDE.md `@-import` 行、`settings.json.enabledPlugins` 残留、cache 孤立目录。**保留** `~/.claude/memory/` 与 `~/.claude/topics/` 下所有数据。
+
+完全断开 marketplace（不再接收更新）：再跑 `/plugin marketplace remove cc-memory-arch`。
 
 ## 测试
 
@@ -214,7 +197,7 @@ cd cc-memory-arch && git pull && ./install.sh
 
 **结论**：综合分排第几不重要——看你的权重。本项目在 IR 行业惯例权重下排末位（5.75）是事实，在"个人 cc 治理痛点"权重下排第一（7.07）也是事实。看你的 use case 落在哪边。
 
-> 加权计算方法、各权重小数值、Python 校验脚本：见 `scripts/score.py`（如需复现），或直接 issue 提出反对意见。
+> 加权计算方法见上表；如对评分有反对意见欢迎 issue。
 
 ### 跟 cc 原生 auto-memory 的关系
 
