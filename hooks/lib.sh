@@ -19,7 +19,8 @@ is_index_file() {
 #   - plugin 内 skill: "cc-memory-arch:mem-write"（cc 加 plugin 前缀）
 recent_skill_active() {
   local transcript="$1"
+  local recent
   [[ -f "$transcript" ]] || return 1
-  tail -300 "$transcript" 2>/dev/null \
-    | grep -qE '"(skill|skill_name|name)":[[:space:]]*"[^"]*mem-write"'
+  recent="$(tail -300 "$transcript" 2>/dev/null || true)"
+  grep -qE '"(skill|skill_name|name)":[[:space:]]*"[^"]*mem-write"' <<<"$recent"
 }
